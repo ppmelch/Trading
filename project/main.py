@@ -1,11 +1,12 @@
 from libraries import *
-from funtions import primera_funcion, librerias, segunda_funcion
+from funtions import dateset_split
 
+def main():
+
+    data = pd.read_csv('Binance_BTCUSDT_1h.csv', skiprows=1).dropna()
+    data['Date'] = pd.to_datetime(data['Date'], format='mixed')
+
+    train, test, validation = dateset_split(data, 0.6, 0.2, 0.2)
 
 if __name__ == "__main__":
-    print("Hola, este es el archivo main.py")
-    primera_funcion()
-    print("El directorio actual es:", os.getcwd())
-
-
-    
+    main()
