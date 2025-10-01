@@ -1,45 +1,47 @@
 
 from libraries import *
+from Objetive import hyperparams
 
-def indicators(data, capital, trial) -> float:
 
-    data= data.copy()
-    # Indicadores e Hyperparametros
+# Indicadores e Hyperparametros
     # -- RSI -- Es el momentum de sobrecompra y sobreventa
     # -- Momentum -- Mide la velocidad del cambio del precio
     # -- Volatilidad -- Mide la variación del precio en el tiempo
 
-    # --- Hiperparámetros ---
-    rsi_window = trial.suggest_int('rsi_window', 5, 50)
-    rsi_lower = trial.suggest_int('rsi_lower', 5, 35)
-    rsi_upper = trial.suggest_int('rsi_upper', 65, 95)
+# --- Función Indicadores ---
 
-    momentum_window = trial.suggest_int('momentum_window', 5, 50)
-    momentum_threshold = trial.suggest_float('momentum_threshold', 0, 2)
+# --- RSI ---
+def get_rsi(data: pd.DataFrame, windows: int, rsi_upper: int, rsi_lower: int) -> pd.Series:
 
-    volatility_window = trial.suggest_int('volatility_window', 5, 30)
-    volatility_threshold = trial.suggest_float('volatility_threshold', 1, 4)
-
-    stop_loss = trial.suggest_float('stop_loss', 0.01, 0.05)
-    take_profit = trial.suggest_float('take_profit', 0.01, 0.15)
-    n_shares = trial.suggest_int('n_shares', 50, 500)
-
-    # --- Indicadores ---
-    data['RSI'] = ta.momentum.RSIIndicator(data['Close'], window=rsi_window).rsi()
-    data['Momentum'] = ta.momentum.MomentumIndicator(data['Close'], window=momentum_window).momentum()
-    data['Volatility'] = ta.volatility.BollingerBands(data['Close'], window=volatility_window).bollinger_wband()
-
-    # --- Señales ---
-    data['buy_signal'] = ((data['RSI'] < rsi_lower) & 
-                        (data['Momentum'] > momentum_threshold) &
-                        (data['Volatility'] < volatility_threshold))
-
-    data['sell_signal'] = ((data['RSI'] > rsi_upper) &
-                        (data['Momentum'] < -momentum_threshold) &
-                        (data['Volatility'] > volatility_threshold))
+    data['RSI'] = ta.momentum.RSIIndicator(data['Close'], window=windows).rsi()
     
-    # --- Backtest ---
+    buy_signal = ((data['RSI'] < rsi_lower)).astype(int)
     
+    sell_signal = ((data['RSI'] > rsi_upper)).astype(int)
     
+    return buy_signal, sell_signal
 
+# --- Momentum ---
+def get_momentum(data: pd.DataFrame, windows: int, threshold: float) -> pd.Series:
+
+    data['Momentum'] = ta.momentum.ROCIndicator(data['Close'], window=windows).roc()
+    
+    buy_signal = ((data['Momentum'] > threshold)).astype(int)
+    
+    sell_signal = ((data['Momentum'] < -threshold)).astype(int)
+    
+    return buy_signal, sell_signal
+
+
+
+# --- Volatility ---
+def get_volatility(data: pd.DataFrame, windows: int, volatility_threshold: float) -> pd.Series:
+    
+    data['Volatility'] = ta.volatility.BollingerBands(data['Close'], window=windows).bollinger_wband()
+    
+    buy_signal = ((data['Volatility'] < volatility_threshold)).astype(int)
+    
+    sell_signal = ((data['Volatility'] > volatility_threshold)).astype(int)
+    
+    return buy_signal, sell_signal
 
