@@ -98,3 +98,6 @@ def backtest(data, capital, trial) -> float:
     retorno_relativo = float(final_portfolio_value / BacktestingCapCOM.initial_capital - 1)
 
     return retorno_relativo, portfolio_values
+
+
+# Hacer solo una función de backtest , aplicando la optimización de hiperparámetros con Optuna
