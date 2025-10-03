@@ -28,7 +28,7 @@ def hyperparams(trial) -> dict:
         
         "take_profit": trial.suggest_float("take_profit", 0.01, 0.2),
         
-        "n_shares": trial.suggest_int("n_shares", 1, 10),
+        "n_shares": trial.suggest_int("n_shares", 1, 80),
     }
 
 

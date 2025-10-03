@@ -1,6 +1,8 @@
 from backtest import backtest
+from libraries import *
 from metrics import get_calmar
 from Indicadores import Indicadores
+from funtions import OptunaOpt, BacktestingCapCOM
 
 
 def optimize(trial, train) -> float:
@@ -23,4 +25,22 @@ def optimize(trial, train) -> float:
     return sum(calmars) / n_splits
 
 
-# def optimize_hyperparams(data: pd.DataFrame ,
+def optimize_hyperparams(
+    data: pd.DataFrame,
+    backtest_config: BacktestingCapCOM,
+    optuna_config: OptunaOpt,
+    metric: str
+) -> optuna.study.Study:
+
+    def objective(trial):
+        return optimize(trial, data)  # solo 2 args
+
+    study = optuna.create_study(direction=optuna_config.direction)
+    study.optimize(
+        objective,
+        n_trials=optuna_config.n_trials,
+        n_jobs=optuna_config.n_jobs,
+        show_progress_bar=optuna_config.show_progress_bar
+    )
+
+    return study
