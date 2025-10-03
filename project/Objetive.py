@@ -1,5 +1,7 @@
 from libraries import *
-
+from backtest import backtest
+from project.metrics import Metrics 
+from funtions import BacktestingCapCOM
 
 # Indicadores e Hyperparametros
 # -- RSI -- Es el momentum de sobrecompra y sobreventa
@@ -9,6 +11,7 @@ from libraries import *
 # --- Hiperparámetros ---
 
 def hyperparams(trial) -> dict:
+
     return {
         "rsi_window": trial.suggest_int("rsi_window", 5, 50),
 
@@ -24,11 +27,10 @@ def hyperparams(trial) -> dict:
         
         "volatility_threshold": trial.suggest_float("volatility_threshold", 0.01, 0.5),
         
-        "stop_loss": trial.suggest_float("stop_loss", 0.01, 0.1),
+        "stop_loss": trial.suggest_float("stop_loss", 0.01, 0.15),
         
         "take_profit": trial.suggest_float("take_profit", 0.01, 0.2),
         
         "n_shares": trial.suggest_int("n_shares", 1, 80),
     }
-
 

@@ -7,6 +7,8 @@ import seaborn as sns
 import optuna              
 import ta
 import os
+from sklearn.model_selection import TimeSeriesSplit
+np.random.seed(42)
 
 plt.rcParams['figure.facecolor'] = 'lightgrey'
 plt.rcParams['figure.figsize'] = (12, 6)
