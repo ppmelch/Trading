@@ -6,6 +6,7 @@ import scipy as sp
 import seaborn as sns
 import optuna              
 import ta
+import os
 
 plt.rcParams['figure.facecolor'] = 'lightgrey'
 plt.rcParams['figure.figsize'] = (12, 6)

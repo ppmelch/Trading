@@ -1,45 +1,51 @@
 from libraries import *
 
-# Performance metrics : Sharpe Ratio, Sortino Ratio, Calmar Ratio, Maximum Drawdown, Win Rate
 
-def get_metrics (data:pd.DataFrame) -> float:
-    #FALTA :
-     # Rendimientos promedio
-     # Std
-     # Downside
-     # Picos Max/Min
-     # Operaciones ganadoras
-     # Total de operaciones
+class Metrics:
+    """
+    Wrapper around an equity curve (portfolio values) 
+    to compute performance metrics as attributes.
+    """
 
-    Ratio_Sharpe_diario = (rend_prom) / std * 100
-    Ratio_Sharpe_mensual = (rend_prom) / std *  np.sqrt(21) * 100
-    Ratio_Sharpe_anual = (rend_prom) / std *  np.sqrt(252) * 100
+    def __init__(self, data: pd.Series):
+        self.data = data
+        self.returns = data.pct_change().dropna()
 
-    Ratio_Sortino_diario = rend_prom / downside 
-    Ratio_Sortino_mensual = rend_prom / downside *  np.sqrt(21) * 100
-    Ratio_Sortino_anual = rend_prom / downside *  np.sqrt(252) * 100
+    @property
+    def sharpe(self) -> float:
+        """Sharpe ratio (annualized, 252 trading days)."""
+        mean_ret = self.returns.mean()
+        std_ret = self.returns.std()
+        return (mean_ret / std_ret) * np.sqrt(252) if std_ret != 0 else 0.0
 
-    Max_Drawdown = (Picomax - valmin) / Picomax * 100
+    @property
+    def sortino(self) -> float:
+        """Sortino ratio (annualized)."""
+        mean_ret = self.returns.mean()
+        downside_std = self.returns[self.returns < 0].std()
+        return (mean_ret / downside_std) * np.sqrt(252) if downside_std != 0 else 0.0
 
-    Ratio_Calmar_diario = rend_prom / Max_Drawdown 
-    Ratio_Calmar_mensual = rend_prom * 21 / Max_Drawdown 
-    Ratio_Calmar_anual = rend_prom * 252/ Max_Drawdown  
+    @property
+    def max_drawdown(self) -> float:
+        """Maximum drawdown (fraction, e.g., -0.25 = -25%)."""
+        rolling_max = self.data.cummax()
+        drawdowns = (self.data / rolling_max - 1)
+        return drawdowns.min()
+
+    @property
+    def calmar(self) -> float:
+        """Calmar ratio = annual return / max drawdown."""
+        annual_return = self.returns.mean() * 252
+        mdd = self.max_drawdown
+        return annual_return / abs(mdd) if mdd != 0 else 0.0
+
+    @property
+    def win_rate(self) -> float:
+        """
+        Placeholder: needs trade data.
+        For now, counts positive return days vs total days.
+        """
+        wins = (self.returns > 0).sum()
+        total = len(self.returns)
+        return wins / total if total > 0 else np.nan
     
-    Win_Rate = (operaciones_win / Total_operaciones ) * 100
-
-
-    R_Sharpe = [Ratio_Sharpe_diario, Ratio_Sharpe_mensual, Ratio_Sharpe_anual]
-    R_Sortino = [Ratio_Sortino_diario, Ratio_Sortino_mensual, Ratio_Sortino_anual]
-    R_Calmar = [Ratio_Calmar_diario, Ratio_Calmar_mensual, Ratio_Calmar_anual]
-    Max_D = [Max_Drawdown, Max_Drawdown, Max_Drawdown]
-    Win_Rate = [Win_Rate, Win_Rate, Win_Rate]
-
-    metrics = pd.DataFrame(
-        data = [R_Sharpe, R_Sortino, R_Calmar, Max_D, Win_Rate],
-        index = ['Sharpe Ratio', 'Sortino Ratio', 'Calmar Ratio', 'Max Drawdown', 'Win Rate'],
-        columns = ['Diario', 'Mensual', 'Anual']
-    )
-
-    return metrics
-
-

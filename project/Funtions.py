@@ -7,7 +7,7 @@ from typing import Optional
 @dataclass
 class Position:
     ticker: str
-    n_shares: int
+    n_shares: float
     price: float
     sl: float
     tp: float
@@ -20,16 +20,27 @@ class BacktestingCapCOM:
 
 class OptunaOpt:
     direction='maximize'
-    n_trials=50
+    n_trials=1
     n_jobs=-1
 
 
-def dateset_split(data:pd.DataFrame, train:float,test:float ,validation:float): 
-    data.copy()
+def dateset_split(data, train, test, validation):
+    """
+    Split dataset into train, test, validation sets.
+    train + test + validation must equal 1.
+    """
     n = len(data)
+    train_end = int(n * train)
+    test_end = train_end + int(n * test)
+
+    train = data.iloc[:train_end]
+    test = data.iloc[train_end:test_end]
+    validation = data.iloc[test_end:]
+
+    return train, test, validation
 
 
-def get_portfolio_value(cash: float, long_ops: list, short_ops: list, current_price: float, n_shares: int, COM: float) -> float:
+def get_portfolio_value(cash: float, long_ops: list, short_ops: list, current_price: float, n_shares: float, COM: float) -> float:
     value = cash
 
     # Valor de las posiciones largas
@@ -42,4 +53,6 @@ def get_portfolio_value(cash: float, long_ops: list, short_ops: list, current_pr
         value += pnl - (current_price * pos.n_shares * COM)
 
     return value
+
+
 

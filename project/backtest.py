@@ -1,17 +1,19 @@
 from libraries import *
-from funtions import Position, BacktestingCapCOM , OptunaOpt , get_portfolio_value
+from funtions import Position, BacktestingCapCOM, OptunaOpt, get_portfolio_value
 from Objetive import hyperparams
-from dataclasses import dataclass
-from Indicadores import get_rsi, get_momentum, get_volatility
+from Indicadores import Indicadores, get_rsi, get_momentum, get_volatility
 
 
-def backtest(data, capital, trial) -> float:
+def backtest(data, sl, tp, n_shares, trial) -> float:
+    # --- Copia del dataset ---
+    data = data.copy()
+
+    # --- Capital inicial ---
+    capital = BacktestingCapCOM.initial_capital
+    cash = float(capital)
 
     # --- Hiperparámetros ---
-    data = data.copy()  
-
     params = hyperparams(trial)
-
     rsi_window = params["rsi_window"]
     rsi_lower = params["rsi_lower"]
     rsi_upper = params["rsi_upper"]
@@ -19,85 +21,79 @@ def backtest(data, capital, trial) -> float:
     momentum_threshold = params["momentum_threshold"]
     volatility_window = params["volatility_window"]
     volatility_threshold = params["volatility_threshold"]
-    stop_loss = params["stop_loss"]
-    take_profit = params["take_profit"]
+    sl = params["stop_loss"]
+    tp = params["take_profit"]
     n_shares = params["n_shares"]
 
-    # --- Señales ---
-    buy_rsi, sell_rsi = get_rsi(data, rsi_window, rsi_upper, rsi_lower)
-    buy_momentum, sell_momentum = get_momentum(data, momentum_window, momentum_threshold)
-    buy_volatility, sell_volatility = get_volatility(data, volatility_window, volatility_threshold)
+    COM = BacktestingCapCOM.COM
 
-    data["buy_signal"]  = buy_rsi & buy_momentum & buy_volatility
+    # --- Señales ---
+    buy_rsi, sell_rsi = Indicadores.get_rsi(data, rsi_window, rsi_upper, rsi_lower)
+    buy_momentum, sell_momentum = Indicadores.get_momentum(
+        data, momentum_window, momentum_threshold)
+    buy_volatility, sell_volatility = Indicadores.get_volatility(
+        data, volatility_window, volatility_threshold)
+
+    data["buy_signal"] = buy_rsi & buy_momentum & buy_volatility
     data["sell_signal"] = sell_rsi & sell_momentum & sell_volatility
 
-    # --- Backtest ---
-    cash = float(capital)
+    # --- Posiciones activas ---
     active_long_positions: list[Position] = []
     active_short_positions: list[Position] = []
 
-    COM = BacktestingCapCOM.COM
-    max_positions_per_side = 1
+    # --- Historial del portafolio ---
+    port_hist = []
+    portafolio_value = cash
 
-    portfolio_values = [BacktestingCapCOM.initial_capital]
-
+    # --- Iterar el DataFrame ---
     for i, row in data.iterrows():
-        price = row.Close
 
-        # --- Cierre LONG ---
+        # === CIERRE DE POSICIONES ===
         for pos in active_long_positions.copy():
-            if price >= pos.tp or price <= pos.sl:
-                cash += price * pos.n_shares * (1 - COM)
+            if (pos.sl > row.Close) or (pos.tp < row.Close):
+                cash += row.Close * pos.n_shares * (1 - COM)
                 active_long_positions.remove(pos)
 
-        # --- Cierre SHORT ---
         for pos in active_short_positions.copy():
-            if price <= pos.tp or price >= pos.sl:
-                cash -= price * pos.n_shares * (1 + COM)
+            if (pos.sl < row.Close) or (pos.tp > row.Close):
+                cash += (pos.price * pos.n_shares) + \
+                    (pos.price - row.Close) * n_shares * (1 - COM)
                 active_short_positions.remove(pos)
 
-        # --- Entrada LONG ---
-        if row.buy_signal:
-            if len(active_long_positions) < max_positions_per_side:
-                cost = price * n_shares * (1 + COM)
-                if cash >= cost:
-                    cash -= cost
-                    pos = Position(
-                        ticker="BTCUSDT", n_shares=n_shares, price=price,
-                        sl=price * (1 - stop_loss), tp=price * (1 + take_profit),
-                        time=getattr(row, "Datetime", None), side="long"
-                    )
-                    active_long_positions.append(pos)
+        # === APERTURA DE POSICIONES ===
+        if row.sell_signal:  # Entrada SHORT
+            cost = row.Close * n_shares * (1 + COM)
+            if cash >= cost:
+                cash -= cost
+                active_short_positions.append(Position(
+                    price=row.Close,
+                    n_shares=n_shares,
+                    sl=row.Close * (1 + sl),
+                    tp=row.Close * (1 - tp),
+                ))
 
-        # --- Entrada SHORT ---
-        if row.sell_signal:
-            if len(active_short_positions) < max_positions_per_side:
-                entry_cash = price * n_shares * (1 - COM)
-                cash += entry_cash
-                pos = Position(
-                    ticker="BTCUSDT", n_shares=n_shares, price=price,
-                    sl=price * (1 + stop_loss), tp=price * (1 - take_profit),
-                    time=getattr(row, "Datetime", None), side="short"
-                )
-                active_short_positions.append(pos)
+        if row.buy_signal:  # Entrada LONG
+            cost = row.Close * n_shares * (1 + COM)
+            if cash >= cost:
+                cash -= cost
+                active_long_positions.append(Position(
+                    price=row.Close,
+                    n_shares=n_shares,
+                    sl=row.Close * (1 - sl),
+                    tp=row.Close * (1 + tp),
+                ))
 
-        # --- Valor del portafolio ---
-        unrealized_long  = sum((price - p.price) * p.n_shares for p in active_long_positions)
-        unrealized_short = sum((p.price - price) * p.n_shares for p in active_short_positions)
-        total_value = cash + unrealized_long + unrealized_short
-        portfolio_values.append(total_value)
+        # === VALOR DEL PORTAFOLIO ===
+        portafolio_value = cash
 
-    # --- Cierre al último precio ---
-    final_price = data.iloc[-1].Close
-    for pos in active_long_positions:
-        cash += final_price * pos.n_shares * (1 - COM)
-    for pos in active_short_positions:
-        cash -= final_price * pos.n_shares * (1 + COM)
+        for pos in active_long_positions:
+            portafolio_value += row.Close * pos.n_shares
 
-    final_portfolio_value = cash
-    retorno_relativo = float(final_portfolio_value / BacktestingCapCOM.initial_capital - 1)
+        for pos in active_short_positions:
+            portafolio_value += (pos.price * pos.n_shares) + \
+                (pos.price * n_shares - row.Close * n_shares)
 
-    return retorno_relativo, portfolio_values
+        port_hist.append(portafolio_value)
 
-
-# Hacer solo una función de backtest , aplicando la optimización de hiperparámetros con Optuna
+    # --- Retorno final ---
+    return port_hist
