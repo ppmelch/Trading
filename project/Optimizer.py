@@ -1,75 +1,87 @@
+from sklearn.model_selection import TimeSeriesSplit
 from backtest import backtest
 from libraries import *
-from metrics import get_calmar
 from Indicadores import Indicadores
 from funtions import OptunaOpt, BacktestingCapCOM
 from metrics import Metrics
+from Objetive import hyperparams
+import optuna
+import numpy as np
+import pandas as pd
 
 
 def optimize(trial, train) -> float:
-    data = train.copy()
+    """
+    Perform a simple K-fold like optimization on chunks of the training data.
 
+    Args:
+        trial: Optuna trial object used to suggest hyperparameters.
+        train (pd.DataFrame): Training dataset.
+
+    Returns:
+        float: Average Calmar ratio across data splits.
+    """
+    data = train.copy()
     n_splits = 5
     len_data = len(data)
     calmars = []
+
     for i in range(n_splits):
         size = len_data // n_splits
         start_idx = i * size
-        end_idx = (i+1)*size
+        end_idx = (i+1) * size
         chunk = data.iloc[start_idx:end_idx]
-        portafolio_value = backtest(
-            chunk, Indicadores.stop_loss, Indicadores.take_profit, Indicadores.n_shares, trial)
-        portafolio_value
-        calmar = get_calmar(portafolio_value)
+        portfolio_value = backtest(
+            chunk, Indicadores.stop_loss, Indicadores.take_profit, Indicadores.n_shares, trial
+        )
+        calmar = Metrics.calmar(portfolio_value)
         calmars.append(calmar)
 
     return sum(calmars) / n_splits
 
 
-def CV(trial, data: pd.DataFrame, backtest_func, n_splits: int, metric: str) -> dict:
+def CV(trial, data: pd.DataFrame, n_splits: int, metric: str) -> float:
+    """
+    Cross-validation for a time series dataset using backtest metrics.
 
-    params = {
-        "rsi_window": trial.suggest_int("rsi_window", 5, 50),
+    Args:
+        trial: Optuna trial object.
+        data (pd.DataFrame): Full dataset.
+        n_splits (int): Number of time series splits.
+        metric (str): Metric name to evaluate (e.g., 'Calmar').
 
-        "rsi_lower": trial.suggest_int("rsi_lower", 5, 35),
-
-        "rsi_upper": trial.suggest_int("rsi_upper", 65, 95),
-
-        "momentum_window": trial.suggest_int("momentum_window", 5, 50),
-
-        "momentum_threshold": trial.suggest_float("momentum_threshold", 0.1, 2.0),
-
-        "volatility_window": trial.suggest_int("volatility_window", 5, 50),
-
-        "volatility_threshold": trial.suggest_float("volatility_threshold", 0.01, 0.5),
-
-        "stop_loss": trial.suggest_float("stop_loss", 0.01, 0.1),
-
-        "take_profit": trial.suggest_float("take_profit", 0.01, 0.2),
-
-        "n_shares": trial.suggest_int("n_shares", 1, 80),
-    }
-
+    Returns:
+        float: Average metric across splits.
+    """
     splits = TimeSeriesSplit(n_splits=n_splits)
     scores = []
 
     for _, test_idx in splits.split(data):
         test_data = data.iloc[test_idx].reset_index(drop=True)
+        # backtest handles hyperparameters
+        _, metrics_dict, _ = backtest(test_data, trial)
+        scores.append(metrics_dict[metric])
 
-        equity = backtest_func(test_data, params)
-        metrics = Metrics(equity)
-
-        scores.append(getattr(metrics, metric))
-
-    mean_score = np.mean(scores)
-
-    return mean_score
+    return np.mean(scores)
 
 
-def optimize_hyperparams(data: pd.DataFrame, backtest_config: BacktestingCapCOM, optuna_config: OptunaOpt, metric: str) -> optuna.study.Study:
+def optimize_hyperparams(data: pd.DataFrame, backtest_config: BacktestingCapCOM,
+                         optuna_config: OptunaOpt, metric: str) -> optuna.study.Study:
+    """
+    Perform hyperparameter optimization using Optuna.
 
+    Args:
+        data (pd.DataFrame): Training dataset.
+        backtest_config (BacktestingCapCOM): Backtesting configuration.
+        optuna_config (OptunaOpt): Optuna configuration.
+        metric (str): Metric to optimize (e.g., 'Calmar').
+
+    Returns:
+        optuna.study.Study: Optuna study object with optimization results.
+    """
     def objective(trial):
-        return optimize(trial, data, backtest_config, optuna_config.n_splits, metric)
+        port_hist, metrics_dict, cash = backtest(data, trial)
+        return metrics_dict['Calmar']  # Ensure key matches metrics dictionary
 
     study = optuna.create_study(direction=optuna_config.direction)
     study.optimize(
@@ -78,5 +90,20 @@ def optimize_hyperparams(data: pd.DataFrame, backtest_config: BacktestingCapCOM,
         n_jobs=optuna_config.n_jobs,
         show_progress_bar=optuna_config.show_progress_bar
     )
-
     return study
+
+
+def run_optimization(data, backtest_config, n_splits, metric):
+    """
+    Wrapper function to run hyperparameter optimization connecting hyperparams and backtest.
+
+    Args:
+        data (pd.DataFrame): Full dataset.
+        backtest_config (BacktestingCapCOM): Backtesting configuration.
+        n_splits (int): Number of splits for cross-validation.
+        metric (str): Metric name for evaluation.
+
+    Returns:
+        dict: Best hyperparameters from the optimization function.
+    """
+    return hyperparams(data, backtest, backtest_config, n_splits, metric)

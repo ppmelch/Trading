@@ -1,10 +1,10 @@
-import pandas as pd 
+import pandas as pd
 from typing import List
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy as sp
 import seaborn as sns
-import optuna              
+import optuna
 import ta
 import os
 from sklearn.model_selection import TimeSeriesSplit
@@ -33,4 +33,3 @@ colors = ["cornflowerblue", "indianred", "darkseagreen", "plum", "dimgray"]
 # Walk forward analysis to avoid overfitting
 # Performance metrics (Sharpe Ratio, Sortino Ratio, Calmar Ratio, Maximum Drawdown, Win Rate)
 # Charts & Tables : Portafolio value through time, Monthly + Quarterly + Annually returns table
-

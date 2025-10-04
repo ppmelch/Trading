@@ -1,20 +1,26 @@
 from libraries import *
 
+
 class Metrics:
     """
-    Wrapper around an equity curve (portfolio values) 
-    to compute performance metrics as attributes.
+    Computes common trading performance metrics for a series of returns or portfolio values.
+
+    Attributes:
+    -----------
+    data : pd.Series
+        Price or portfolio value series.
+    returns : pd.Series
+        Computed returns from the input series.
     """
 
     def __init__(self, data: pd.Series):
         """
-        Initialize the class with the portfolio equity curve.
-        
+        Initializes the Metrics object.
+
         Parameters:
-        - data: Series of portfolio values.
-        
-        Attributes:
-        - returns: Daily percentage returns, computed with pct_change().
+        -----------
+        data : pd.Series
+            Historical price or portfolio data.
         """
         self.data = data
         self.returns = data.pct_change().dropna()
@@ -22,83 +28,85 @@ class Metrics:
     @property
     def sharpe(self) -> float:
         """
-        Compute the annualized Sharpe Ratio.
-        
-        Formula:
-            (mean of returns / standard deviation of returns) * sqrt(252)
-        
-        Measures risk-adjusted return using total volatility.
-        If volatility is zero, returns 0.0.
+        Calculates the annualized Sharpe ratio.
+
+        Returns:
+        --------
+        float
+            Sharpe ratio, 0 if not computable.
         """
         mean_ret = self.returns.mean()
         std_ret = self.returns.std()
-        return (mean_ret / std_ret) * np.sqrt(252) if std_ret != 0 else 0.0
+        if np.isnan(mean_ret) or np.isnan(std_ret) or std_ret == 0:
+            return 0.0
+        return (mean_ret / std_ret) * np.sqrt(252)
 
     @property
     def sortino(self) -> float:
         """
-        Compute the annualized Sortino Ratio.
-        
-        Similar to Sharpe but only penalizes downside volatility.
-        
-        Formula:
-            (mean of returns / standard deviation of negative returns) * sqrt(252)
-        
-        Useful when focusing only on downside risk.
+        Calculates the annualized Sortino ratio.
+
+        Returns:
+        --------
+        float
+            Sortino ratio, 0 if not computable.
         """
         mean_ret = self.returns.mean()
         downside_std = self.returns[self.returns < 0].std()
-        return (mean_ret / downside_std) * np.sqrt(252) if downside_std != 0 else 0.0
+        if np.isnan(mean_ret) or np.isnan(downside_std) or downside_std == 0:
+            return 0.0
+        return (mean_ret / downside_std) * np.sqrt(252)
 
     @property
     def max_drawdown(self) -> float:
         """
-        Compute the Maximum Drawdown (MDD).
-        
-        Measures the largest peak-to-trough decline in the equity curve.
-        
-        Formula:
-            (current_value / rolling_max - 1)
-        
-        Returns the worst drawdown as a negative fraction 
-        (e.g., -0.25 = -25%).
+        Computes the maximum drawdown from the data series.
+
+        Returns:
+        --------
+        float
+            Maximum drawdown as a negative percentage, 0 if not computable.
         """
+        if self.data.empty:
+            return 0.0
         rolling_max = self.data.cummax()
         drawdowns = (self.data / rolling_max - 1)
+        if drawdowns.isnull().all():
+            return 0.0
         return drawdowns.min()
 
     @property
     def calmar(self) -> float:
         """
-        Compute the Calmar Ratio.
-        
-        Formula:
-            (annualized return / absolute max drawdown)
-        
-        Measures return relative to the worst drawdown.
-        If MDD = 0, returns 0.0.
+        Calculates the Calmar ratio: annualized return divided by max drawdown.
+
+        Returns:
+        --------
+        float
+            Calmar ratio, 0 if not computable or max drawdown is zero.
         """
         annual_return = self.returns.mean() * 252
         mdd = self.max_drawdown
-        return annual_return / abs(mdd) if mdd != 0 else 0.0
+        if np.isnan(annual_return) or mdd == 0:
+            return 0.0
+        return annual_return / abs(mdd)
 
-    @property
+    @staticmethod
     def win_rate(closed_positions) -> float:
         """
-        Compute the Win Rate (success ratio).
-        
+        Calculates the win rate for closed positions.
+
         Parameters:
-        - closed_positions: List of closed trades with a 'profit' attribute.
-        
-        Formula:
-            (number of winning trades / total trades)
-        
-        If there are no trades, returns 0.
+        -----------
+        closed_positions : list
+            List of Position objects with 'profit' attribute.
+
+        Returns:
+        --------
+        float
+            Proportion of positions that were profitable, 0 if list is empty.
         """
         if not closed_positions:
-            return 0
-        n_wins = sum(1 for pos in closed_positions if pos.profit)
+            return 0.0
+        n_wins = sum(1 for pos in closed_positions if pos.profit > 0)
         return n_wins / len(closed_positions)
-
-
-
