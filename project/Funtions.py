@@ -62,7 +62,7 @@ class OptunaOpt:
         Show Optuna progress bar.
     """
     direction: str = 'maximize'
-    n_trials: int = 50
+    n_trials: int = 10
     n_jobs: int = -1
     n_splits: int = 1
     show_progress_bar: bool = True

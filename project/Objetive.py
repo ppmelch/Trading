@@ -29,7 +29,7 @@ def hyperparams(trial) -> dict:
         n_shares (int): Number of shares to trade per position (1-80).
     """
     return {
-        "rsi_window": trial.suggest_int("rsi_window", 5, 90),
+        "rsi_window": trial.suggest_int("rsi_window", 5, 50),
 
         "rsi_lower": trial.suggest_int("rsi_lower", 5, 35),
 
@@ -43,9 +43,9 @@ def hyperparams(trial) -> dict:
 
         "volatility_threshold": trial.suggest_float("volatility_threshold", 0.01, 0.5),
 
-        "stop_loss": trial.suggest_float("stop_loss", 0.01, 0.15),
+        "stop_loss": trial.suggest_float("stop_loss", 0.01, 0.2),
 
-        "take_profit": trial.suggest_float("take_profit", 0.01, 0.2),
+        "take_profit": trial.suggest_float("take_profit", 0.2, 0.3),
 
-        "n_shares": trial.suggest_int("n_shares", 1, 80),
+        "n_shares": trial.suggest_int("n_shares", 1, 50),
     }

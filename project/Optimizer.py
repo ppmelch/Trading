@@ -5,9 +5,6 @@ from Indicadores import Indicadores
 from funtions import OptunaOpt, BacktestingCapCOM
 from metrics import Metrics
 from Objetive import hyperparams
-import optuna
-import numpy as np
-import pandas as pd
 
 
 def optimize(trial, train) -> float:
@@ -57,7 +54,7 @@ def CV(trial, data: pd.DataFrame, n_splits: int, metric: str) -> float:
     scores = []
 
     for _, test_idx in splits.split(data):
-        test_data = data.iloc[test_idx].reset_index(drop=True)
+        test_data = data.iloc[test_idx].copy().reset_index(drop=True)
         # backtest handles hyperparameters
         _, metrics_dict, _ = backtest(test_data, trial)
         scores.append(metrics_dict[metric])
@@ -80,7 +77,7 @@ def optimize_hyperparams(data: pd.DataFrame, backtest_config: BacktestingCapCOM,
         optuna.study.Study: Optuna study object with optimization results.
     """
     def objective(trial):
-        port_hist, metrics_dict, cash = backtest(data, trial)
+        port_hist, metrics_dict, cash = backtest(data.copy(), trial)
         return metrics_dict['Calmar']  # Ensure key matches metrics dictionary
 
     study = optuna.create_study(direction=optuna_config.direction)
@@ -106,4 +103,4 @@ def run_optimization(data, backtest_config, n_splits, metric):
     Returns:
         dict: Best hyperparameters from the optimization function.
     """
-    return hyperparams(data, backtest, backtest_config, n_splits, metric)
+    return hyperparams(data.copy(), backtest, backtest_config, n_splits, metric)

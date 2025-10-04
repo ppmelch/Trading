@@ -23,7 +23,7 @@ class Metrics:
             Historical price or portfolio data.
         """
         self.data = data
-        self.returns = data.pct_change().dropna()
+        self.returns = data.pct_change().dropna() if not data.empty else pd.Series(dtype=float)
 
     @property
     def sharpe(self) -> float:
@@ -35,6 +35,8 @@ class Metrics:
         float
             Sharpe ratio, 0 if not computable.
         """
+        if self.returns.empty:
+            return 0.0
         mean_ret = self.returns.mean()
         std_ret = self.returns.std()
         if np.isnan(mean_ret) or np.isnan(std_ret) or std_ret == 0:
@@ -51,6 +53,8 @@ class Metrics:
         float
             Sortino ratio, 0 if not computable.
         """
+        if self.returns.empty:
+            return 0.0
         mean_ret = self.returns.mean()
         downside_std = self.returns[self.returns < 0].std()
         if np.isnan(mean_ret) or np.isnan(downside_std) or downside_std == 0:
@@ -71,9 +75,9 @@ class Metrics:
             return 0.0
         rolling_max = self.data.cummax()
         drawdowns = (self.data / rolling_max - 1)
-        if drawdowns.isnull().all():
+        if drawdowns.isnull().all() or drawdowns.empty:
             return 0.0
-        return drawdowns.min()
+        return float(drawdowns.min()) if not np.isnan(drawdowns.min()) else 0.0
 
     @property
     def calmar(self) -> float:
@@ -85,6 +89,8 @@ class Metrics:
         float
             Calmar ratio, 0 if not computable or max drawdown is zero.
         """
+        if self.returns.empty:
+            return 0.0
         annual_return = self.returns.mean() * 252
         mdd = self.max_drawdown
         if np.isnan(annual_return) or mdd == 0:
@@ -108,5 +114,5 @@ class Metrics:
         """
         if not closed_positions:
             return 0.0
-        n_wins = sum(1 for pos in closed_positions if pos.profit > 0)
-        return n_wins / len(closed_positions)
+        n_wins = sum(1 for pos in closed_positions if pos.profit is not None and pos.profit > 0)
+        return n_wins / len(closed_positions) if len(closed_positions) > 0 else 0.0

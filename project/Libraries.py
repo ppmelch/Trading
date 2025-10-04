@@ -8,6 +8,9 @@ import optuna
 import ta
 import os
 from sklearn.model_selection import TimeSeriesSplit
+import warnings
+warnings.filterwarnings("ignore", category=RuntimeWarning)
+
 np.random.seed(42)
 
 plt.rcParams['figure.facecolor'] = 'lightgrey'
@@ -21,6 +24,7 @@ plt.rcParams['axes.labelsize'] = 12
 plt.rcParams['legend.frameon'] = True
 plt.rcParams['legend.facecolor'] = 'white'
 plt.rcParams['legend.edgecolor'] = 'black'
+
 
 colors = ["cornflowerblue", "indianred", "darkseagreen", "plum", "dimgray"]
 
