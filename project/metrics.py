@@ -1,14 +1,13 @@
 from libraries import *
 
-
 class Metrics:
     """
     Computes common trading performance metrics for a series of returns or portfolio values.
 
-    Attributes:
-    -----------
+    Attributes
+    ----------
     data : pd.Series
-        Price or portfolio value series.
+        Historical price or portfolio value series.
     returns : pd.Series
         Computed returns from the input series.
     """
@@ -17,10 +16,10 @@ class Metrics:
         """
         Initializes the Metrics object.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         data : pd.Series
-            Historical price or portfolio data.
+            Historical price or portfolio value series.
         """
         self.data = data
         self.returns = data.pct_change().dropna() if not data.empty else pd.Series(dtype=float)
@@ -30,10 +29,10 @@ class Metrics:
         """
         Calculates the annualized Sharpe ratio.
 
-        Returns:
-        --------
+        Returns
+        -------
         float
-            Sharpe ratio, 0 if not computable.
+            Annualized Sharpe ratio. Returns 0 if not computable.
         """
         if self.returns.empty:
             return 0.0
@@ -48,10 +47,10 @@ class Metrics:
         """
         Calculates the annualized Sortino ratio.
 
-        Returns:
-        --------
+        Returns
+        -------
         float
-            Sortino ratio, 0 if not computable.
+            Annualized Sortino ratio. Returns 0 if not computable.
         """
         if self.returns.empty:
             return 0.0
@@ -66,10 +65,10 @@ class Metrics:
         """
         Computes the maximum drawdown from the data series.
 
-        Returns:
-        --------
+        Returns
+        -------
         float
-            Maximum drawdown as a negative percentage, 0 if not computable.
+            Maximum drawdown as a negative percentage. Returns 0 if not computable.
         """
         if self.data.empty:
             return 0.0
@@ -82,12 +81,12 @@ class Metrics:
     @property
     def calmar(self) -> float:
         """
-        Calculates the Calmar ratio: annualized return divided by max drawdown.
+        Calculates the Calmar ratio: annualized return divided by maximum drawdown.
 
-        Returns:
-        --------
+        Returns
+        -------
         float
-            Calmar ratio, 0 if not computable or max drawdown is zero.
+            Calmar ratio. Returns 0 if not computable or max drawdown is zero.
         """
         if self.returns.empty:
             return 0.0
@@ -100,17 +99,17 @@ class Metrics:
     @staticmethod
     def win_rate(closed_positions) -> float:
         """
-        Calculates the win rate for closed positions.
+        Calculates the win rate for a list of closed positions.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         closed_positions : list
-            List of Position objects with 'profit' attribute.
+            List of Position objects with a 'profit' attribute.
 
-        Returns:
-        --------
+        Returns
+        -------
         float
-            Proportion of positions that were profitable, 0 if list is empty.
+            Proportion of positions that were profitable. Returns 0 if the list is empty.
         """
         if not closed_positions:
             return 0.0

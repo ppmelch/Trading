@@ -64,7 +64,7 @@ class OptunaOpt:
     direction: str = 'maximize'
     n_trials: int = 10
     n_jobs: int = -1
-    n_splits: int = 1
+    n_splits: int = 5
     show_progress_bar: bool = True
 
 

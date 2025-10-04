@@ -1,14 +1,25 @@
-import pandas as pd
-from typing import List
-import numpy as np
-import matplotlib.pyplot as plt
-import scipy as sp
-import seaborn as sns
-import optuna
-import ta
+# --- Standard library ---
 import os
-from sklearn.model_selection import TimeSeriesSplit
 import warnings
+
+# --- Third-party libraries: Data analysis ---
+import ta
+import numpy as np
+import pandas as pd
+import scipy as sp
+
+# --- Third-party libraries: Visualization ---
+import seaborn as sns
+import matplotlib as plt
+import matplotlib.ticker as mtick
+
+# --- Third-party libraries: Machine Learning / Optimization ---
+import optuna
+from sklearn.model_selection import TimeSeriesSplit
+
+# --- Type hints ---
+from typing import List
+
 warnings.filterwarnings("ignore", category=RuntimeWarning)
 
 np.random.seed(42)
