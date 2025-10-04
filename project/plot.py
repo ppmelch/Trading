@@ -9,16 +9,14 @@ def plot_portfolio(port_value, final_cash, name="Portfolio"):
         final_cash (float): Final value of the portfolio.
         name (str, optional): Name of the portfolio for labeling. Default is "Portfolio".
     """
-    import matplotlib.pyplot as plt
-    import pandas as pd
-    
+
     # Convert to pd.Series if a list or ndarray
     if isinstance(port_value, list) or isinstance(port_value, np.ndarray):
         port_value = pd.Series(port_value, name=name)
     
     fig, ax = plt.subplots(figsize=(12,5))
     ax.plot(port_value, color=colors[1], lw=2, label=f'{port_value.name}\nFinal: ${final_cash:,.2f}')
-    ax.set_title(f'{port_value.name} over time', fontsize=14)
+    ax.set_title(f'{port_value.name}', fontsize=14)
     ax.set_xlabel('Time step', fontsize=12)
     ax.set_ylabel('Value ($)', fontsize=12)
     ax.legend()
@@ -39,9 +37,6 @@ def plot_test_validation(test_data, validation_data, backtest_func, best_params)
     Returns:
         tuple: test_port, val_port, final_cash_test, final_cash_val
     """
-    import numpy as np
-    import matplotlib.pyplot as plt
-    import matplotlib.ticker as mtick
 
     # --- Backtest ---
     test_port, _, final_cash_test = backtest_func(test_data, best_params)

@@ -19,6 +19,8 @@ train_dates = pd.concat([train['Date'], test['Date'].iloc[:1]]).tolist()
 test_dates = pd.concat([test['Date'], validation['Date'].iloc[-1:]]).tolist()
 val_dates = pd.concat([validation['Date'], data['Date'].iloc[-1:]]).tolist()
 
+optimization_metric = "Sortino" # 'Sharpe', 'Sortino', 'Calmar'
+
 def main():
     # --- Configuraciones ---
     backtest_config = BacktestingCapCOM()
@@ -26,7 +28,7 @@ def main():
     
     # --- OPTUNA TRAIN ---
     study = optimize_hyperparams(
-        train, backtest_config, optimizacion_config, metric="Sharpe")
+        train, backtest_config, optimizacion_config, metric= optimization_metric)
     best_params = study.best_trial.params
     best_value = study.best_value
     print("Mejores parámetros TRAIN:", best_params)

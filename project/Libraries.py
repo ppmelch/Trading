@@ -10,7 +10,7 @@ import scipy as sp
 
 # --- Third-party libraries: Visualization ---
 import seaborn as sns
-import matplotlib as plt
+import matplotlib.pyplot as plt
 import matplotlib.ticker as mtick
 
 # --- Third-party libraries: Machine Learning / Optimization ---

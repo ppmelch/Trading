@@ -116,7 +116,11 @@ def backtest(data, trial_or_params) -> tuple[list, dict, float]:
         cash += (pos.price * pos.n_shares * (1 + COM)) + pnl
 
     # Compute metrics
-    metrics_dict = {"Calmar": Metrics(pd.DataFrame(
-        {"PortValue": port_value}).PortValue).calmar}
+    metrics_dict = {"Calmar": Metrics(pd.DataFrame({"PortValue": port_value}).PortValue).calmar,
+                    "Sharpe": Metrics(pd.DataFrame({"PortValue": port_value}).PortValue).sharpe,
+                    "Sortino": Metrics(pd.DataFrame({"PortValue": port_value}).PortValue).sortino,
+                    "Maximum Drawdown": Metrics(pd.DataFrame({"PortValue": port_value}).PortValue).max_drawdown,
+                    "Win_Rate": Metrics(pd.DataFrame({"PortValue": port_value}).PortValue).win_rate}
+
 
     return port_value, metrics_dict, cash
