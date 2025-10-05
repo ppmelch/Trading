@@ -55,14 +55,12 @@ def plot_test_validation(port_value_test, port_value_val):
 
 def print_best_hyperparams(params: dict) -> None:
     """
-    Prints the best hyperparameters from an Optuna study.
-
+    Prints the best hyperparameters from the optimization process.
     Parameters
     ----------
-    study : optuna.study.Study
-        Optuna study object containing optimization results.
+    params : dict
+        Dictionary containing hyperparameter names and their best values.
     """
-    print("-----------------------------------\n")
     print('\n--- Best Hyperparameters ---')
     for param, value in params.items():
         if isinstance(value, float):

@@ -107,28 +107,3 @@ def optimize_hyperparams(data: pd.DataFrame,
     return study
 
 
-def run_optimization(data: pd.DataFrame,
-                     backtest_config: BacktestingCapCOM,
-                     n_splits: int,
-                     metric: str) -> dict:
-    """
-    Wrapper function to run hyperparameter optimization, connecting hyperparameters and backtest.
-
-    Parameters
-    ----------
-    data : pd.DataFrame
-        Full dataset.
-    backtest_config : BacktestingCapCOM
-        Backtesting configuration object.
-    n_splits : int
-        Number of splits for cross-validation.
-    metric : str
-        Metric name for evaluation (e.g., 'Calmar').
-
-    Returns
-    -------
-    dict
-        Best hyperparameters obtained from the optimization process.
-    """
-    return hyperparams(data.copy(), backtest, backtest_config, n_splits, metric)
-

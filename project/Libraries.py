@@ -21,6 +21,7 @@ from sklearn.model_selection import TimeSeriesSplit
 from typing import List
 
 warnings.filterwarnings("ignore", category=RuntimeWarning)
+optuna.logging.set_verbosity(optuna.logging.ERROR)
 
 np.random.seed(42)
 
@@ -38,13 +39,3 @@ plt.rcParams['legend.edgecolor'] = 'black'
 
 
 colors = ["cornflowerblue", "indianred", "darkseagreen", "plum", "dimgray"]
-
-
-# Requirements
-# transactions_fee: float = 0.0125  # 0.125% per trade
-# No leverage
-# Long + Short positions
-# Signal Confirmation ( 2 out of 3 indicators agree)
-# Walk forward analysis to avoid overfitting
-# Performance metrics (Sharpe Ratio, Sortino Ratio, Calmar Ratio, Maximum Drawdown, Win Rate)
-# Charts & Tables : Portafolio value through time, Monthly + Quarterly + Annually returns table

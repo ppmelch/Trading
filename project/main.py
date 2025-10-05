@@ -30,8 +30,9 @@ def main():
     # --- OPTUNA TRAIN ---
     study = optimize_hyperparams(
         train, backtest_config, optimizacion_config, metric=optimization_metric)
-    best_params = study.best_trial.params
-    print_best_hyperparams(best_params)
+    best_params = study.best_trial
+    print(f"--- Best {optimization_metric}: {study.best_trial.value:.4f} ---")
+    print_best_hyperparams(best_params.params)
 
     # --- BACKTEST TRAIN ---
     port_value_train, metrics_train, final_cash_train = backtest(
