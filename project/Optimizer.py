@@ -131,3 +131,4 @@ def run_optimization(data: pd.DataFrame,
         Best hyperparameters obtained from the optimization process.
     """
     return hyperparams(data.copy(), backtest, backtest_config, n_splits, metric)
+
