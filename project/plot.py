@@ -72,7 +72,7 @@ def print_best_hyperparams(params: dict) -> None:
     print("-----------------------------------\n")
 
 
-def print_metricas(metrics: dict):
+def print_metricas(metrics: dict, name: str = "Portfolio"):
     """
     Prints the trading performance metrics in a formatted manner.
 
@@ -80,8 +80,10 @@ def print_metricas(metrics: dict):
     ----------
     metrics : dict
         Dictionary containing metric names and their corresponding values.
+    name : str, optional
+        Name of the portfolio for labeling. Default is "Portfolio".
     """
-    print("\n--- Trading Performance Metrics ---")
+    print(f"\n--- Trading Performance {name} Metrics ---")
     for key, value in metrics.items():
         if isinstance(value, float):
             if key in ["Calmar", "Sharpe", "Sortino"]:

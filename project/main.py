@@ -36,20 +36,20 @@ def main():
     # --- BACKTEST TRAIN ---
     port_value_train, metrics_train, final_cash_train = backtest(
         train, best_params)
-    print_metricas(metrics_train)
+    print_metricas(metrics_train, name="TRAIN")
     plot_portfolio(port_value_train, final_cash_train, name="TRAIN")
 
     # --- BACKTEST TEST ---
     port_value_test, metrics_test, final_cash_test = backtest(
         test, best_params)
-    print_metricas(metrics_test)
+    print_metricas(metrics_test , name="TEST")
     plot_portfolio(port_value_test, final_cash_test, name="TEST")
 
     # --- BACKTEST VALIDATION ---
 
     port_value_val, metrics_val, final_cash_val = backtest(
         validation, best_params, initial_cash=final_cash_test)
-    print_metricas(metrics_val)
+    print_metricas(metrics_val, name="VALIDATION")
     plot_portfolio(port_value_val, final_cash_val, name="VALIDATION")
 
     # ---  TEST + VALIDATION  ---
