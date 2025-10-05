@@ -116,13 +116,20 @@ def backtest(data: pd.DataFrame, trial_or_params, initial_cash: float = None) ->
     # --- Metrics ---
     port_series = pd.Series(port_value).replace(0, np.nan).dropna()
     metrics_obj = Metrics(port_series)
+
+    final_value = port_value[-1]
+    initial_value = port_value[0]
+    profit = final_value - initial_value
+
     metrics_dict = {
         "Calmar": metrics_obj.calmar,
         "Sharpe": metrics_obj.sharpe,
         "Sortino": metrics_obj.sortino,
         "Maximum Drawdown": metrics_obj.max_drawdown,
         "Win Rate": Metrics.win_rate(closed_positions),
-        "Total Return (%)": (port_value[-1] - port_value[0]) / port_value[0] * 100
+        "Total Return (%)": (final_value - initial_value) / initial_value * 100,
+        "Profit ($)": f"${profit:,.2f}",
+        "Final Capital ($)": f"${cash:,.2f}"
     }
 
     return port_value, metrics_dict, cash
