@@ -12,15 +12,15 @@ class Indicadores:
     @staticmethod
     def get_rsi(data: pd.DataFrame, fast: int = 12, slow: int = 26, signal: int = 9) -> tuple[pd.Series, pd.Series]:
         df = data.copy()
-        macd = ta.trend.MACD(df['Close'], window_slow=slow, window_fast=fast, window_sign=signal)
+        macd = ta.trend.MACD(df['Close'], window_slow=slow,
+                             window_fast=fast, window_sign=signal)
         df['MACD_diff'] = macd.macd_diff()  # MACD - Signal
         buy_signal = (df['MACD_diff'] > 0).astype(int)
         sell_signal = (df['MACD_diff'] < 0).astype(int)
         return buy_signal.fillna(0), sell_signal.fillna(0)
 
-
     @staticmethod
-    def get_momentum(data: pd.DataFrame, windows: int, threshold: float)-> tuple[pd.Series, pd.Series]:
+    def get_momentum(data: pd.DataFrame, windows: int, threshold: float) -> tuple[pd.Series, pd.Series]:
         """
         Calculate momentum (Rate of Change) and generate buy/sell signals.
 
@@ -40,7 +40,7 @@ class Indicadores:
         return buy_signal, sell_signal
 
     @staticmethod
-    def get_volatility(data: pd.DataFrame, windows: int, volatility_threshold: float)-> tuple[pd.Series, pd.Series]:
+    def get_volatility(data: pd.DataFrame, windows: int, volatility_threshold: float) -> tuple[pd.Series, pd.Series]:
         """
         Calculate Bollinger Bands-based volatility and generate buy/sell signals.
 

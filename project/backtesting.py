@@ -4,6 +4,7 @@ from hyperparams import hyperparams
 from indicators import Indicadores
 from functions import Position, BacktestingCapCOM, get_portfolio_value
 
+
 def backtest(data: pd.DataFrame, trial_or_params, initial_cash: float = None) -> tuple[list, dict, float]:
     """
     Executes a backtest using RSI, Momentum, and Volatility strategies.
@@ -27,7 +28,8 @@ def backtest(data: pd.DataFrame, trial_or_params, initial_cash: float = None) ->
     data = data.copy().reset_index(drop=True)
 
     # --- Parameters ---
-    params = trial_or_params if isinstance(trial_or_params, dict) else hyperparams(trial_or_params)
+    params = trial_or_params if isinstance(
+        trial_or_params, dict) else hyperparams(trial_or_params)
 
     rsi_window = params["rsi_window"]
     rsi_lower = params["rsi_lower"]
@@ -45,13 +47,18 @@ def backtest(data: pd.DataFrame, trial_or_params, initial_cash: float = None) ->
     cash = BacktestingCapCOM.initial_capital if initial_cash is None else initial_cash
 
     # --- Signals ---
-    buy_rsi, sell_rsi = Indicadores.get_rsi(data, rsi_window, rsi_upper, rsi_lower)
-    buy_momentum, sell_momentum = Indicadores.get_momentum(data, momentum_window, momentum_threshold)
-    buy_volatility, sell_volatility = Indicadores.get_volatility(data, volatility_window, volatility_threshold)
+    buy_rsi, sell_rsi = Indicadores.get_rsi(
+        data, rsi_window, rsi_upper, rsi_lower)
+    buy_momentum, sell_momentum = Indicadores.get_momentum(
+        data, momentum_window, momentum_threshold)
+    buy_volatility, sell_volatility = Indicadores.get_volatility(
+        data, volatility_window, volatility_threshold)
 
     historic = data.copy()
-    historic["buy_signal"] = (buy_rsi.astype(int) + buy_momentum.astype(int) + buy_volatility.astype(int)) >= 2
-    historic["sell_signal"] = (sell_rsi.astype(int) + sell_momentum.astype(int) + sell_volatility.astype(int)) >= 2
+    historic["buy_signal"] = (buy_rsi.astype(
+        int) + buy_momentum.astype(int) + buy_volatility.astype(int)) >= 2
+    historic["sell_signal"] = (sell_rsi.astype(
+        int) + sell_momentum.astype(int) + sell_volatility.astype(int)) >= 2
     historic = historic.dropna().reset_index(drop=True)
 
     # --- Tracking ---
@@ -98,7 +105,6 @@ def backtest(data: pd.DataFrame, trial_or_params, initial_cash: float = None) ->
                     sl=price*(1+stop_loss), tp=price*(1-take_profit)
                 ))
 
-
         # --- Portfolio value ---
         port_value.append(get_portfolio_value(
             cash, active_long_positions, active_short_positions, price, n_shares
@@ -136,4 +142,3 @@ def backtest(data: pd.DataFrame, trial_or_params, initial_cash: float = None) ->
     }
 
     return port_value, metrics_dict, cash
-

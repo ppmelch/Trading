@@ -1,7 +1,7 @@
 from libraries import *
 
 
-def plot_portfolio(port_value, final_cash, name="Portfolio")-> None:
+def plot_portfolio(port_value, final_cash, name="Portfolio") -> None:
     """
     Plots the portfolio value over time.
     Parameters
@@ -27,7 +27,7 @@ def plot_portfolio(port_value, final_cash, name="Portfolio")-> None:
     plt.show()
 
 
-def plot_test_validation(port_value_test, port_value_val)-> None:
+def plot_test_validation(port_value_test, port_value_val) -> None:
     """
     Plots the portfolio values for test and validation datasets.
     Parameters:
@@ -82,7 +82,7 @@ def print_metricas(metrics, name: str = "Portfolio") -> None:
     name : str, optional
         Name of the portfolio for labeling. Default is "Portfolio".
     """
-    
+
     # --- Normalize to list ---
     if isinstance(metrics, dict):
         metrics_list = [metrics]
@@ -108,7 +108,8 @@ def print_metricas(metrics, name: str = "Portfolio") -> None:
             combined[key] = total
         # Numeric ratios that can be averaged
         elif isinstance(metrics_list[0][key], float):
-            combined[key] = sum(m[key] for m in metrics_list) / len(metrics_list)
+            combined[key] = sum(m[key]
+                                for m in metrics_list) / len(metrics_list)
         # Keep other types as is (e.g., strings)
         else:
             combined[key] = metrics_list[-1][key]
@@ -173,18 +174,23 @@ def tables(port_value_test, port_value_val, test_val_dates, name="TEST + VALIDAT
     total_portfolio = port_value_test + port_value_val
 
     # --- Align dates (use last N matching portfolio length) ---
-    dates_aligned = pd.Series(test_val_dates).iloc[-len(total_portfolio):].reset_index(drop=True)
+    dates_aligned = pd.Series(
+        test_val_dates).iloc[-len(total_portfolio):].reset_index(drop=True)
 
     # --- Create DataFrame with datetime index ---
-    port_df = pd.DataFrame({"Portfolio_Value": total_portfolio}, index=pd.to_datetime(dates_aligned))
+    port_df = pd.DataFrame(
+        {"Portfolio_Value": total_portfolio}, index=pd.to_datetime(dates_aligned))
 
     # --- Calculate daily returns ---
     daily_returns = port_df['Portfolio_Value'].pct_change()
 
     # --- Compute compounded returns ---
-    monthly_df = daily_returns.resample('ME').apply(lambda x: (1 + x).prod() - 1).to_frame("Monthly_Returns")
-    quarterly_df = daily_returns.resample('QE').apply(lambda x: (1 + x).prod() - 1).to_frame("Quarterly_Returns")
-    annual_df = daily_returns.resample('YE').apply(lambda x: (1 + x).prod() - 1).to_frame("Annual_Returns")
+    monthly_df = daily_returns.resample('ME').apply(
+        lambda x: (1 + x).prod() - 1).to_frame("Monthly_Returns")
+    quarterly_df = daily_returns.resample('QE').apply(
+        lambda x: (1 + x).prod() - 1).to_frame("Quarterly_Returns")
+    annual_df = daily_returns.resample('YE').apply(
+        lambda x: (1 + x).prod() - 1).to_frame("Annual_Returns")
 
     # --- Display tables ---
     print(f"\n--- {name} Monthly Returns ---")

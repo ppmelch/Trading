@@ -68,7 +68,7 @@ class OptunaOpt:
     show_progress_bar: bool = True
 
 
-def dateset_split(data: pd.DataFrame, train: float, test: float, validation: float)-> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+def dateset_split(data: pd.DataFrame, train: float, test: float, validation: float) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """
     Splits a DataFrame into training, testing, and validation sets.
 

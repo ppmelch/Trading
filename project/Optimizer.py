@@ -4,7 +4,6 @@ from functions import OptunaOpt, BacktestingCapCOM
 from sklearn.model_selection import TimeSeriesSplit
 
 
-
 def optimize(trial, train: pd.DataFrame) -> float:
     """
     Performs a simple K-fold like optimization on chunks of the training data.
@@ -104,5 +103,3 @@ def optimize_hyperparams(data: pd.DataFrame,
         show_progress_bar=optuna_config.show_progress_bar
     )
     return study
-
-
