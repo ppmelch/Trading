@@ -1,7 +1,7 @@
 from libraries import *
-from backtest import backtest
-from Optimizer import optimize_hyperparams
-from funtions import dateset_split, BacktestingCapCOM, OptunaOpt
+from project.backtesting import backtest
+from optimizer import optimize_hyperparams
+from project.functions import dateset_split, BacktestingCapCOM, OptunaOpt
 from plot import plot_portfolio, plot_test_validation, print_best_hyperparams, print_metricas
 
 
@@ -19,7 +19,8 @@ test_dates = pd.concat(
 val_dates = pd.concat(
     [test['Date'].iloc[-1:], validation['Date'].iloc[-1:]]).tolist()
 
-optimization_metric = "Calmar"  # 'Sharpe', 'Sortino', 'Calmar'
+optimization_metric = "Sharpe"  # 'Sharpe', 'Sortino', 'Calmar'
+
 
 
 def main():
@@ -55,7 +56,6 @@ def main():
 
     # ---  TEST + VALIDATION  ---
     plot_test_validation(port_value_test, port_value_val)
-
 
 if __name__ == "__main__":
     main()

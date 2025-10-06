@@ -1,7 +1,6 @@
 from libraries import *
-from backtest import backtest
-from funtions import OptunaOpt, BacktestingCapCOM
-from Objetive import hyperparams
+from backtesting import backtest
+from functions import OptunaOpt, BacktestingCapCOM
 from sklearn.model_selection import TimeSeriesSplit
 
 

@@ -1,8 +1,8 @@
 from libraries import *
 from metrics import Metrics
-from Objetive import hyperparams
-from Indicadores import Indicadores
-from funtions import Position, BacktestingCapCOM, get_portfolio_value
+from objective import hyperparams
+from indicators import Indicadores
+from functions import Position, BacktestingCapCOM, get_portfolio_value
 
 def backtest(data: pd.DataFrame, trial_or_params, initial_cash: float = None) -> tuple[list, dict, float]:
     """

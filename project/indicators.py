@@ -1,6 +1,5 @@
 from libraries import *
 from dataclasses import dataclass
-import ta
 
 
 @dataclass

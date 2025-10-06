@@ -2,10 +2,10 @@ from libraries import *
 
 class Metrics:
     def __init__(self, data: pd.Series):
-        # Stores historical data (price or portfolio value)
+        """
+        Initializes the Metrics class with historical data.
+        """
         self.data = data
-        # Calculates period returns (percentage change)
-        # If no data is provided, creates an empty Series
         self.returns = data.pct_change(fill_method=None).dropna() if not data.empty else pd.Series(dtype=float)
 
     @property
