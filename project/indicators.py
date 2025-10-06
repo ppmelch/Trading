@@ -10,25 +10,14 @@ class Indicadores:
     """
 
     @staticmethod
-    def get_rsi(data: pd.DataFrame, windows: int, rsi_upper: int, rsi_lower: int)-> tuple[pd.Series, pd.Series]:
-        """
-        Calculate RSI and generate buy/sell signals.
+    def get_rsi(data: pd.DataFrame, fast: int = 12, slow: int = 26, signal: int = 9) -> tuple[pd.Series, pd.Series]:
+        df = data.copy()
+        macd = ta.trend.MACD(df['Close'], window_slow=slow, window_fast=fast, window_sign=signal)
+        df['MACD_diff'] = macd.macd_diff()  # MACD - Signal
+        buy_signal = (df['MACD_diff'] > 0).astype(int)
+        sell_signal = (df['MACD_diff'] < 0).astype(int)
+        return buy_signal.fillna(0), sell_signal.fillna(0)
 
-        Args:
-            data (pd.DataFrame): DataFrame containing 'Close' prices.
-            windows (int): Lookback period for RSI calculation.
-            rsi_upper (int): RSI threshold above which to generate sell signal.
-            rsi_lower (int): RSI threshold below which to generate buy signal.
-
-        Returns:
-            tuple(pd.Series, pd.Series): Buy and sell signals (1 = signal, 0 = no signal).
-        """
-        windows = min(windows, len(data)-1)
-        data['RSI'] = ta.momentum.RSIIndicator(
-            data['Close'], window=windows).rsi()
-        buy_signal = ((data['RSI'] < rsi_lower)).astype(int).fillna(0)
-        sell_signal = ((data['RSI'] > rsi_upper)).astype(int).fillna(0)
-        return buy_signal, sell_signal
 
     @staticmethod
     def get_momentum(data: pd.DataFrame, windows: int, threshold: float)-> tuple[pd.Series, pd.Series]:

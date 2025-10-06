@@ -45,7 +45,7 @@ def plot_test_validation(port_value_test, port_value_val)-> None:
     plt.plot(x_val, port_value_val,
              color=colors[1], linewidth=2, label="Validation")
 
-    plt.title("Evolución del valor del portafolio (Test + Validation)")
+    plt.title("Test + Validation")
     plt.xlabel("Timestep")
     plt.ylabel("Portfolio Value")
     plt.legend()
@@ -134,28 +134,39 @@ def print_metricas(metrics, name: str = "Portfolio") -> None:
     print("-----------------------------------\n")
 
 
-
 def tables(port_value_test, port_value_val, test_val_dates, name="TEST + VALIDATION") -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """
-    Compute and display compounded returns for TEST + VALIDATION sets, using a single combined date series.
-    Shows monthly, quarterly, and annual returns as tables and bar plots with positive returns in green
-    and negative returns in red.
+    Computes, displays, and visualizes compounded returns for combined TEST and VALIDATION portfolio values.
+
+    This function concatenates portfolio values from the TEST and VALIDATION sets, aligns them with the 
+    provided date series, and calculates compounded returns at monthly, quarterly, and annual frequencies.
+    Each return series is displayed as a formatted DataFrame and plotted as a color-coded bar chart
+    (green for positive, red for negative returns).
 
     Parameters
     ----------
     port_value_test : list or pd.Series
-        Portfolio values for TEST set.
+        Portfolio values for the TEST set.
     port_value_val : list or pd.Series
-        Portfolio values for VALIDATION set.
+        Portfolio values for the VALIDATION set.
     test_val_dates : list or pd.Series
-        Combined date range covering TEST + VALIDATION.
+        Combined date range corresponding to both TEST and VALIDATION portfolios.
     name : str, optional
-        Name for display and plot titles. Default is "TEST + VALIDATION".
+        Custom name for display headers and plot titles. Default is "TEST + VALIDATION".
 
     Returns
     -------
     tuple of pd.DataFrame
-        (monthly_df, quarterly_df, annual_df) containing compounded returns.
+        A tuple containing three DataFrames:
+            - `monthly_df` : Monthly compounded returns (%)
+            - `quarterly_df` : Quarterly compounded returns (%)
+            - `annual_df` : Annual compounded returns (%)
+
+    Notes
+    -----
+    - Returns are computed as compounded (geometric) returns.
+    - Displayed tables and plots are meant for visual performance analysis.
+    - Missing or mismatched date lengths are automatically adjusted from the end of the date series.
     """
 
     # --- Concatenate portfolio values ---
@@ -186,13 +197,27 @@ def tables(port_value_test, port_value_val, test_val_dates, name="TEST + VALIDAT
     # --- Internal plot function ---
     def plot_returns(series: pd.Series, title: str):
         """
-        Plots a series of returns as a bar chart with positive returns in green and negative in red,
-        annotating each bar with the percentage.
+        Plots a bar chart of returns with positive values in green and negative values in red.
+
+        Each bar represents a periods compounded return, labeled with its corresponding percentage value.
+
+        Parameters
+        ----------
+        series : pd.Series
+            Time-indexed return series to be plotted (monthly, quarterly, or annual).
+        title : str
+            Title of the plot (e.g., "Monthly", "Quarterly", "Annual").
+
+        Notes
+        -----
+        - Bars are color-coded: from libraries.py colors[0] for positive returns and colors[1] for negative returns.
+        - The function automatically formats x-axis labels and scales for readability.
+        - Designed for visual inspection of performance across time periods.
         """
-        plt.figure(figsize=(10,4))
-        bars = plt.bar(series.index.strftime('%Y-%m-%d'), series*100,
-                       color=['#2E8B57' if v >= 0 else '#A30406' for v in series], alpha=0.7)
-        plt.title(f"{title} Returns ({name})")
+        plt.figure(figsize=(10, 4))
+        bars = plt.bar(series.index.strftime('%Y-%m-%d'), series * 100,
+                       color=[colors[0] if v >= 0 else colors[1] for v in series], alpha=1)
+        plt.title(f"{title} Returns")
         plt.ylabel("Return (%)")
         plt.xticks(rotation=90, fontsize=8)
         plt.yticks(fontsize=8)
@@ -206,5 +231,3 @@ def tables(port_value_test, port_value_val, test_val_dates, name="TEST + VALIDAT
     plot_returns(annual_df['Annual_Returns'].dropna(), "Annual")
 
     return monthly_df, quarterly_df, annual_df
-
-

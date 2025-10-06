@@ -15,7 +15,10 @@ data = data.iloc[::-1].reset_index(drop=True)
 train, test, validation = dateset_split(data, 0.6, 0.2, 0.2)
 
 # Fechas de TRAIN (puedes usarlas afuera si necesitas)
-train_dates = train['Date'].reset_index(drop=True)
+train_dates = pd.concat([train['Date'], test['Date'].iloc[:1]]).tolist()
+test_dates = pd.concat([train['Date'].iloc[-1:], test['Date']]).tolist()
+valid_dates = pd.concat([test['Date'].iloc[-1:], validation['Date']]).tolist()
+test_val_dates_aligned = test_dates + valid_dates[1:]
 
 # Métrica de optimización
 optimization_metric = "Calmar"  # 'Sharpe', 'Sortino', 'Calmar'
@@ -50,14 +53,9 @@ def main():
     print_metricas(metrics_val, name="VALIDATION")
     plot_portfolio(port_value_val, final_cash_val, name="VALIDATION")
 
-    # --- Alinear fechas TEST + VALIDATION ---
-    test_dates_aligned = test['Date'].iloc[-len(port_value_test):].reset_index(drop=True)
-    val_dates_aligned = validation['Date'].iloc[-len(port_value_val):].reset_index(drop=True)
-    test_val_dates_aligned = pd.concat([test_dates_aligned, val_dates_aligned]).reset_index(drop=True)
-
-    # --- Tablas ---
+    # --- Tables ---
     monthly_df, quarterly_df, annual_df = tables(
-        port_value_test, port_value_val, test_val_dates_aligned, name="TEST + VALIDATION"
+        port_value_test, port_value_val, test_val_dates_aligned, name=""
     )
 
     # --- Graficar TEST + VALIDATION ---

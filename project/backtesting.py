@@ -1,6 +1,6 @@
 from libraries import *
 from metrics import Metrics
-from objective import hyperparams
+from hyperparams import hyperparams
 from indicators import Indicadores
 from functions import Position, BacktestingCapCOM, get_portfolio_value
 
@@ -38,7 +38,7 @@ def backtest(data: pd.DataFrame, trial_or_params, initial_cash: float = None) ->
     volatility_threshold = params["volatility_threshold"]
     stop_loss = params["stop_loss"]
     take_profit = params["take_profit"]
-    capital_pct_exp = params.get("capital_pct_exp", 0.1)
+    capital_pct_exp = params["capital_pct_exp"]
 
     # --- Commission & Capital ---
     COM = BacktestingCapCOM.COM
@@ -55,7 +55,7 @@ def backtest(data: pd.DataFrame, trial_or_params, initial_cash: float = None) ->
     historic = historic.dropna().reset_index(drop=True)
 
     # --- Tracking ---
-    active_long_positions, active_short_positions, port_value = [], [], []
+    active_long_positions, active_short_positions, port_value = [], [], [cash]
     closed_positions = []
 
     # --- Backtest Loop ---
@@ -80,21 +80,24 @@ def backtest(data: pd.DataFrame, trial_or_params, initial_cash: float = None) ->
                 closed_positions.append(pos)
                 active_short_positions.remove(pos)
 
-        # --- Open LONG positions ---
-        if row.buy_signal and cash > price * n_shares * (1 + COM):
-            cash -= price * n_shares * (1 + COM)
-            active_long_positions.append(Position(
-                price=price, n_shares=n_shares,
-                sl=price*(1-stop_loss), tp=price*(1+take_profit)
-            ))
+                # --- Open LONG positions ---
+        if row.buy_signal and not active_long_positions and not active_short_positions:
+            if cash > price * n_shares * (1 + COM):
+                cash -= price * n_shares * (1 + COM)
+                active_long_positions.append(Position(
+                    price=price, n_shares=n_shares,
+                    sl=price*(1-stop_loss), tp=price*(1+take_profit)
+                ))
 
         # --- Open SHORT positions ---
-        if row.sell_signal and cash > price * n_shares * (1 + COM):
-            cash -= price * n_shares * (1 + COM)
-            active_short_positions.append(Position(
-                price=price, n_shares=n_shares,
-                sl=price*(1+stop_loss), tp=price*(1-take_profit)
-            ))
+        if row.sell_signal and not active_short_positions and not active_long_positions:
+            if cash > price * n_shares * (1 + COM):
+                cash -= price * n_shares * (1 + COM)
+                active_short_positions.append(Position(
+                    price=price, n_shares=n_shares,
+                    sl=price*(1+stop_loss), tp=price*(1-take_profit)
+                ))
+
 
         # --- Portfolio value ---
         port_value.append(get_portfolio_value(
@@ -133,3 +136,4 @@ def backtest(data: pd.DataFrame, trial_or_params, initial_cash: float = None) ->
     }
 
     return port_value, metrics_dict, cash
+
