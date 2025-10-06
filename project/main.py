@@ -24,7 +24,7 @@ from libraries import *
 from backtesting import backtest
 from optimizer import optimize_hyperparams
 from functions import dateset_split, BacktestingCapCOM, OptunaOpt
-from plot import (plot_portfolio, plot_test_validation,
+from visualization import (plot_portfolio, plot_test_validation,
                   print_best_hyperparams, print_metricas, tables)
 
 # --- Load Data ---
