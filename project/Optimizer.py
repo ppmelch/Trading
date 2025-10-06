@@ -92,7 +92,7 @@ def optimize_hyperparams(data: pd.DataFrame,
     optuna.study.Study
         Optuna study object with optimization results.
     """
-    def objective(trial):
+    def objective(trial) -> float:
         port_value, metrics_dict, _ = backtest(data.copy(), trial)
         return metrics_dict.get(metric, 0.0)
 

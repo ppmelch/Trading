@@ -1,8 +1,8 @@
 from libraries import *
-from project.backtesting import backtest
+from backtesting import backtest
 from optimizer import optimize_hyperparams
-from project.functions import dateset_split, BacktestingCapCOM, OptunaOpt
-from plot import plot_portfolio, plot_test_validation, print_best_hyperparams, print_metricas
+from functions import dateset_split, BacktestingCapCOM, OptunaOpt
+from plot import plot_portfolio, plot_test_validation, print_best_hyperparams, print_metricas, returns_overtime_test_val
 
 
 base_dir = os.path.dirname(__file__)
@@ -19,8 +19,7 @@ test_dates = pd.concat(
 val_dates = pd.concat(
     [test['Date'].iloc[-1:], validation['Date'].iloc[-1:]]).tolist()
 
-optimization_metric = "Sharpe"  # 'Sharpe', 'Sortino', 'Calmar'
-
+optimization_metric = "Calmar"  # 'Sharpe', 'Sortino', 'Calmar'
 
 
 def main():
@@ -44,11 +43,10 @@ def main():
     # --- BACKTEST TEST ---
     port_value_test, metrics_test, final_cash_test = backtest(
         test, best_params)
-    print_metricas(metrics_test , name="TEST")
+    print_metricas(metrics_test, name="TEST")
     plot_portfolio(port_value_test, final_cash_test, name="TEST")
 
     # --- BACKTEST VALIDATION ---
-
     port_value_val, metrics_val, final_cash_val = backtest(
         validation, best_params, initial_cash=final_cash_test)
     print_metricas(metrics_val, name="VALIDATION")
@@ -56,6 +54,11 @@ def main():
 
     # ---  TEST + VALIDATION  ---
     plot_test_validation(port_value_test, port_value_val)
+
+    # --- RETURNS TABLES ---
+    monthly_df, quarterly_df, annual_df = returns_overtime_test_val(
+        port_value_test, test['Date'], port_value_val, validation['Date'])
+
 
 if __name__ == "__main__":
     main()

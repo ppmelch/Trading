@@ -12,6 +12,7 @@ import scipy as sp
 import seaborn as sns
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mtick
+from IPython.display import display
 
 # --- Third-party libraries: Machine Learning / Optimization ---
 import optuna

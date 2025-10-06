@@ -10,7 +10,7 @@ class Indicadores:
     """
 
     @staticmethod
-    def get_rsi(data: pd.DataFrame, windows: int, rsi_upper: int, rsi_lower: int):
+    def get_rsi(data: pd.DataFrame, windows: int, rsi_upper: int, rsi_lower: int)-> tuple[pd.Series, pd.Series]:
         """
         Calculate RSI and generate buy/sell signals.
 
@@ -31,7 +31,7 @@ class Indicadores:
         return buy_signal, sell_signal
 
     @staticmethod
-    def get_momentum(data: pd.DataFrame, windows: int, threshold: float):
+    def get_momentum(data: pd.DataFrame, windows: int, threshold: float)-> tuple[pd.Series, pd.Series]:
         """
         Calculate momentum (Rate of Change) and generate buy/sell signals.
 
@@ -51,7 +51,7 @@ class Indicadores:
         return buy_signal, sell_signal
 
     @staticmethod
-    def get_volatility(data: pd.DataFrame, windows: int, volatility_threshold: float):
+    def get_volatility(data: pd.DataFrame, windows: int, volatility_threshold: float)-> tuple[pd.Series, pd.Series]:
         """
         Calculate Bollinger Bands-based volatility and generate buy/sell signals.
 
