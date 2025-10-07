@@ -33,15 +33,19 @@ file_path = os.path.join(base_dir, "Binance_BTCUSDT_1h.csv")
 
 # Read CSV, drop missing values, reverse to chronological order
 data = pd.read_csv(file_path).copy().dropna()
+data = data.iloc[::-1].reset_index(drop=True)
 
 # --- Dataset Split ---
 train, test, validation = dateset_split(data, 0.6, 0.2, 0.2)
 
-# Date handling for later plotting/analysis
-train_dates = pd.concat([train["Date"], test["Date"].iloc[:1]]).tolist()
-test_dates = pd.concat([train["Date"].iloc[-1:], test["Date"]]).tolist()
-valid_dates = pd.concat([test["Date"].iloc[-1:], validation["Date"]]).tolist()
-test_val_dates_aligned = test_dates + valid_dates[1:]
+# --- Alinear fechas con cada portafolio ---
+# NOTA: asumimos que cada fila del dataset tiene 1 valor de portafolio
+train_dates = train["Date"].reset_index(drop=True)
+test_dates = test["Date"].reset_index(drop=True)
+valid_dates = validation["Date"].reset_index(drop=True)
+
+# Concatenar TEST + VALIDATION para tablas y plots combinados
+test_val_dates_aligned = pd.concat([test_dates, valid_dates]).reset_index(drop=True)
 
 # Optimization metric to guide Optuna
 optimization_metric = "Calmar"  # Options: 'Sharpe', 'Sortino', 'Calmar'
@@ -94,8 +98,9 @@ def main():
 
     # --- TABLES ---
     monthly_df, quarterly_df, annual_df = tables(
-        port_value_test, port_value_val, test_val_dates_aligned, name=""
+        port_value_test, port_value_val, test_val_dates_aligned, name="TEST+VALIDATION"
     )
+
 
     # --- TEST + VALIDATION PLOT ---
     plot_test_validation(port_value_test, port_value_val)

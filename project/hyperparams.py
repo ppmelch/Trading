@@ -5,10 +5,9 @@ from libraries import *
 # -- Momentum: Measures the speed of price change
 # -- Volatility: Measures price variation over time
 
-
 def hyperparams(trial) -> dict:
     """
-    Define the hyperparameter search space for the backtesting strategy (corrected ranges).
+    Define the hyperparameter search space for the backtesting strategy (updated for volatility filter).
 
     Args:
         trial (optuna.trial.Trial): An Optuna trial object used to suggest hyperparameter values.
@@ -17,25 +16,21 @@ def hyperparams(trial) -> dict:
         dict: Dictionary containing hyperparameters and their suggested values.
     """
     return {
+        # --- RSI ---
+        "rsi_window": trial.suggest_int("rsi_window", 11, 25),
+        "rsi_lower": trial.suggest_int("rsi_lower", 25, 35),
+        "rsi_upper": trial.suggest_int("rsi_upper", 60, 80),
 
-        "rsi_window": trial.suggest_int("rsi_window", 14, 20),
+        # --- Momentum ---
+        "momentum_window": trial.suggest_int("momentum_window", 10, 22),
+        "momentum_threshold": trial.suggest_float("momentum_threshold", 0.02, 0.1),
 
-        "rsi_lower": trial.suggest_int("rsi_lower", 30, 40),
+        # --- Volatility filter ---
+        "volatility_window": trial.suggest_int("volatility_window", 25, 35),  
+        "volatility_quantile": trial.suggest_float("volatility_quantile", 0.6, 0.70),  
 
-        "rsi_upper": trial.suggest_int("rsi_upper", 60, 70),
-
-        "momentum_window": trial.suggest_int("momentum_window", 10, 20),
-
-        "momentum_threshold": trial.suggest_float("momentum_threshold", 0.05, 0.15),
-
-        "volatility_window": trial.suggest_int("volatility_window", 10, 15),
-
-        "volatility_threshold": trial.suggest_float("volatility_threshold", 0.01, 0.02),
-
-        "stop_loss": trial.suggest_float("stop_loss", 0.01, 0.02),
-
-        "take_profit": trial.suggest_float("take_profit", 0.02, 0.04),
-
-        "capital_pct_exp": trial.suggest_float("capital_pct_exp", 0.05, 0.15)
-
+        # --- Risk management ---
+        "stop_loss": trial.suggest_float("stop_loss", 0.02, 0.03),
+        "take_profit": trial.suggest_float("take_profit", 0.05, 0.10),
+        "capital_pct_exp": trial.suggest_float("capital_pct_exp", 0.05, 0.20),
     }

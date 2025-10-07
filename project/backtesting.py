@@ -7,29 +7,12 @@ from functions import Position, BacktestingCapCOM, get_portfolio_value
 
 def backtest(data: pd.DataFrame, trial_or_params, initial_cash: float = None) -> tuple[list, dict, float]:
     """
-    Executes a backtest using RSI, Momentum, and Volatility strategies.
-
-    Parameters
-    ----------
-    data : pd.DataFrame
-        Historical price data containing at least a 'Close' column.
-    trial_or_params : optuna.trial.Trial or dict
-        Optuna trial object or dictionary of parameters.
-    initial_cash : float, optional
-        Starting capital for the backtest. Defaults to BacktestingCapCOM.initial_capital.
-
-    Returns
-    -------
-    tuple
-        - port_value (list): Portfolio value over time.
-        - metrics_dict (dict): Performance metrics.
-        - final_cash (float): Final cash after closing all positions.
+    Executes a backtest using RSI, Momentum, and Volatility strategies with volatility as a filter.
     """
     data = data.copy().reset_index(drop=True)
 
     # --- Parameters ---
-    params = trial_or_params if isinstance(
-        trial_or_params, dict) else hyperparams(trial_or_params)
+    params = trial_or_params if isinstance(trial_or_params, dict) else hyperparams(trial_or_params)
 
     rsi_window = params["rsi_window"]
     rsi_lower = params["rsi_lower"]
@@ -37,7 +20,7 @@ def backtest(data: pd.DataFrame, trial_or_params, initial_cash: float = None) ->
     momentum_window = params["momentum_window"]
     momentum_threshold = params["momentum_threshold"]
     volatility_window = params["volatility_window"]
-    volatility_threshold = params["volatility_threshold"]
+    volatility_quantile = params["volatility_quantile"]
     stop_loss = params["stop_loss"]
     take_profit = params["take_profit"]
     capital_pct_exp = params["capital_pct_exp"]
@@ -47,18 +30,18 @@ def backtest(data: pd.DataFrame, trial_or_params, initial_cash: float = None) ->
     cash = BacktestingCapCOM.initial_capital if initial_cash is None else initial_cash
 
     # --- Signals ---
-    buy_rsi, sell_rsi = Indicadores.get_rsi(
-        data, rsi_window, rsi_upper, rsi_lower)
-    buy_momentum, sell_momentum = Indicadores.get_momentum(
-        data, momentum_window, momentum_threshold)
-    buy_volatility, sell_volatility = Indicadores.get_volatility(
-        data, volatility_window, volatility_threshold)
+    buy_rsi, sell_rsi = Indicadores.get_rsi(data, rsi_window, rsi_upper, rsi_lower)
+    buy_momentum, sell_momentum = Indicadores.get_momentum(data, momentum_window, momentum_threshold)
 
+    # --- Volatility filter ---
+    vol = data['Close'].rolling(volatility_window).std()
+    vol_threshold = vol.quantile(volatility_quantile)
+    low_vol = vol < vol_threshold  # mercado estable
+
+    # --- Combine signals (2/3 + low-vol filter) ---
     historic = data.copy()
-    historic["buy_signal"] = (buy_rsi.astype(
-        int) + buy_momentum.astype(int) + buy_volatility.astype(int)) >= 2
-    historic["sell_signal"] = (sell_rsi.astype(
-        int) + sell_momentum.astype(int) + sell_volatility.astype(int)) >= 2
+    historic["buy_signal"] = ((buy_rsi + 2 * buy_momentum) >= 2) & low_vol
+    historic["sell_signal"] = ((sell_rsi + 2 * sell_momentum) >= 2) & low_vol
     historic = historic.dropna().reset_index(drop=True)
 
     # --- Tracking ---
@@ -87,13 +70,13 @@ def backtest(data: pd.DataFrame, trial_or_params, initial_cash: float = None) ->
                 closed_positions.append(pos)
                 active_short_positions.remove(pos)
 
-                # --- Open LONG positions ---
+        # --- Open LONG positions ---
         if row.buy_signal and not active_long_positions and not active_short_positions:
             if cash > price * n_shares * (1 + COM):
                 cash -= price * n_shares * (1 + COM)
                 active_long_positions.append(Position(
                     price=price, n_shares=n_shares,
-                    sl=price*(1-stop_loss), tp=price*(1+take_profit)
+                    sl=price * (1 - stop_loss), tp=price * (1 + take_profit)
                 ))
 
         # --- Open SHORT positions ---
@@ -102,7 +85,7 @@ def backtest(data: pd.DataFrame, trial_or_params, initial_cash: float = None) ->
                 cash -= price * n_shares * (1 + COM)
                 active_short_positions.append(Position(
                     price=price, n_shares=n_shares,
-                    sl=price*(1+stop_loss), tp=price*(1-take_profit)
+                    sl=price * (1 + stop_loss), tp=price * (1 - take_profit)
                 ))
 
         # --- Portfolio value ---
