@@ -12,7 +12,8 @@ def backtest(data: pd.DataFrame, trial_or_params, initial_cash: float = None) ->
     data = data.copy().reset_index(drop=True)
 
     # --- Parameters ---
-    params = trial_or_params if isinstance(trial_or_params, dict) else hyperparams(trial_or_params)
+    params = trial_or_params if isinstance(
+        trial_or_params, dict) else hyperparams(trial_or_params)
 
     rsi_window = params["rsi_window"]
     rsi_lower = params["rsi_lower"]
@@ -30,8 +31,10 @@ def backtest(data: pd.DataFrame, trial_or_params, initial_cash: float = None) ->
     cash = BacktestingCapCOM.initial_capital if initial_cash is None else initial_cash
 
     # --- Signals ---
-    buy_rsi, sell_rsi = Indicadores.get_rsi(data, rsi_window, rsi_upper, rsi_lower)
-    buy_momentum, sell_momentum = Indicadores.get_momentum(data, momentum_window, momentum_threshold)
+    buy_rsi, sell_rsi = Indicadores.get_rsi(
+        data, rsi_window, rsi_upper, rsi_lower)
+    buy_momentum, sell_momentum = Indicadores.get_momentum(
+        data, momentum_window, momentum_threshold)
 
     # --- Volatility filter ---
     vol = data['Close'].rolling(volatility_window).std()

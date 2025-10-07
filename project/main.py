@@ -25,7 +25,7 @@ from backtesting import backtest
 from optimizer import optimize_hyperparams
 from functions import dateset_split, BacktestingCapCOM, OptunaOpt
 from visualization import (plot_portfolio, plot_test_validation,
-                  print_best_hyperparams, print_metricas, tables)
+                           print_best_hyperparams, print_metricas, tables)
 
 # --- Load Data ---
 base_dir = os.path.dirname(__file__)
@@ -43,7 +43,8 @@ test_dates = test["Date"].reset_index(drop=True)
 valid_dates = validation["Date"].reset_index(drop=True)
 
 # Concatenar TEST + VALIDATION para tablas y plots combinados
-test_val_dates_aligned = pd.concat([test_dates, valid_dates]).reset_index(drop=True)
+test_val_dates_aligned = pd.concat(
+    [test_dates, valid_dates]).reset_index(drop=True)
 
 # Optimization metric to guide Optuna
 optimization_metric = "Calmar"  # Options: 'Sharpe', 'Sortino', 'Calmar'
@@ -98,7 +99,6 @@ def main():
     monthly_df, quarterly_df, annual_df = tables(
         port_value_test, port_value_val, test_val_dates_aligned, name="TEST+VALIDATION"
     )
-
 
     # --- TEST + VALIDATION PLOT ---
     plot_test_validation(port_value_test, port_value_val)
