@@ -33,7 +33,6 @@ file_path = os.path.join(base_dir, "Binance_BTCUSDT_1h.csv")
 
 # Read CSV, drop missing values, reverse to chronological order
 data = pd.read_csv(file_path).copy().dropna()
-data = data.iloc[::-1].reset_index(drop=True)
 
 # --- Dataset Split ---
 train, test, validation = dateset_split(data, 0.6, 0.2, 0.2)
