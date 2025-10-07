@@ -93,7 +93,7 @@ A total of **50 trials** were conducted.
 ## 📈 Performance Overview
 
 | Dataset | Calmar | Sharpe | Sortino | Max DD | Win Rate | Total Return | Final Capital |
-|----------|---------|---------|----------|---------|-----------|---------------|
+|----------|---------|---------|----------|---------|-----------|---------------|----------------|
 | **Train (60%)** | 1.41 | 1.00 | 1.52 | 7.49% | 4.67% | +35% | \$1,626,250 |
 | **Test (20%)** | -0.25 | -0.29 | -0.45 | 8.46% | 24.36% | -3.84% | \$961,602 |
 | **Validation (20%)** | 2.26 | 1.51 | 2.48 | 4.99% | 4.99% | +19.46% | \$1,148,439 |
@@ -130,7 +130,8 @@ The validation period shows strong recovery and confirms **robustness and adapta
 **Language:** Python  
 **Libraries:**
 - `pandas`, `numpy` — data processing  
-- `optuna` — Bayesian optimization  
+- `optuna` — Bayesian optimization
+- `scikit-learn` - Time Series Cross-Validation
 - `matplotlib`, `seaborn` — visualization  
 - `TA-Lib` or custom indicator functions  
 **Development Tools:** Jupyter Notebook, VSCode  
@@ -164,35 +165,30 @@ project/
 ├── requirements.txt
 └── README.md
 
-
-
 ---
 
 ## ⚙️ Installation, Execution, and Example Output
 
 To reproduce the results of this project and visualize the performance metrics, follow these steps:
 
-```bash
-# 1️⃣ Clone the repository
+
+# 1. Clone the repository
 git clone https://github.com/ppmelch/Trading.git
 cd Trading/project
 
-# 2️⃣ Create a virtual environment (recommended)
+# 2. Create a virtual environment (recommended)
 python -m venv env
 
-# Activate it:
-# Windows
+# 3. Activate virtual environment:
+
+## Windows
 env\Scripts\activate
-# macOS / Linux
+
+## macOS / Linux
 source env/bin/activate
 
-# 3️⃣ Install dependencies
+# 4. Install dependencies
 pip install -r requirements.txt
 
-# 💡 Note:
-# If TA-Lib fails to install (common on Windows), install it manually:
-pip install TA-Lib-0.4.28-cp311-cp311-win_amd64.whl
-# (You can download the correct .whl from https://www.lfd.uci.edu/~gohlke/pythonlibs/#ta-lib)
-
-# 4️⃣ Run the trading strategy
+# 5. Run the trading strategy
 python main.py
