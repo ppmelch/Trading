@@ -38,8 +38,6 @@ data = data.iloc[::-1].reset_index(drop=True)
 # --- Dataset Split ---
 train, test, validation = dateset_split(data, 0.6, 0.2, 0.2)
 
-# --- Alinear fechas con cada portafolio ---
-# NOTA: asumimos que cada fila del dataset tiene 1 valor de portafolio
 train_dates = train["Date"].reset_index(drop=True)
 test_dates = test["Date"].reset_index(drop=True)
 valid_dates = validation["Date"].reset_index(drop=True)
