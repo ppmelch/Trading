@@ -1,4 +1,8 @@
+# 002 Introduction to Trading
 # 📈 Systematic Trading Strategy – BTC/USDT
+## 🧠 Author
+**José Armando Melchor Soto – ITESO**
+
 
 This project develops a **systematic trading strategy** that integrates multiple **technical indicators**, dynamic position sizing, and **Bayesian hyperparameter optimization** to achieve consistent **risk-adjusted returns** in the cryptocurrency market.  
 It lays the groundwork for more resilient and intelligent trading systems that balance **return and risk** over time.
