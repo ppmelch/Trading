@@ -1,0 +1,10 @@
+artifact_location: file:///C:/Users/ppmel/Documentos/ITESO%207mo%20Semestre/Trading/mlruns/405891793552856262/models/m-cad774ffd33f4d799a6528efbe407bc2/artifacts
+creation_timestamp: 1760499646922
+experiment_id: '405891793552856262'
+last_updated_timestamp: 1760499656045
+model_id: m-cad774ffd33f4d799a6528efbe407bc2
+model_type: null
+name: model
+source_run_id: c31918f3e2d14532b340b7301ed9a0e3
+status: 2
+status_message: null

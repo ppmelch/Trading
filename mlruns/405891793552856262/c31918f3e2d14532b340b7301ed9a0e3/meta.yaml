@@ -1,0 +1,14 @@
+artifact_uri: file:///C:/Users/ppmel/Documentos/ITESO%207mo%20Semestre/Trading/mlruns/405891793552856262/c31918f3e2d14532b340b7301ed9a0e3/artifacts
+end_time: 1760499656053
+entry_point_name: ''
+experiment_id: '405891793552856262'
+lifecycle_stage: active
+run_id: c31918f3e2d14532b340b7301ed9a0e3
+run_name: nebulous-squid-715
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1760499501979
+status: 3
+tags: []
+user_id: ppmel
